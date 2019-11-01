@@ -66,4 +66,18 @@ func moore(mp [][]bool, i, j int) {
 	}
 	// con CON cantidad que sucede...
 
+	if mp[i][j] {
+		switch {
+		case con < 3:
+			mp[i][j] = false
+		case con == 3 || con == 4:
+			break
+		case con > 4:
+			mp[i][j] = false
+		}
+	} else {
+		if con == 3 {
+			mp[i][j] = true
+		}
+	}
 }
