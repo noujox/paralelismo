@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"strconv"
+)
 
 type point struct {
 	x int
@@ -12,9 +16,35 @@ type area struct {
 }
 
 func main() {
+	//  -ng NUM_GORUTINAS -r NUM_FILAS -c NUM_COLS -i GENERACIONES \path -m MET_PART -s SEMILLA
+	args := os.Args
 
-	n := 5
-	m := 5
+	ite := 1
+	n := 1
+	m := 1
+	nGo := 1
+	bloqueBool := false
+	semilla := 1
+
+	for i, arg := range args {
+		switch arg {
+		case "-ng":
+			nGo, _ = strconv.Atoi(args[i+1])
+		case "-r":
+			n, _ = strconv.Atoi(args[i+1])
+		case "-c":
+			m, _ = strconv.Atoi(args[i+1])
+		case "-i":
+			ite, _ = strconv.Atoi(args[i+1])
+		case "-m":
+			if args[i+1] == "1" {
+				bloqueBool = true
+			}
+		case "-s":
+			semilla, _ = strconv.Atoi(args[i+1])
+		}
+	}
+
 	mp := make([][]bool, m)
 	for i := 0; i < len(mp); i++ {
 		mp[i] = make([]bool, n)
@@ -25,15 +55,6 @@ func main() {
 	mp[2][1] = true
 	mp[2][2] = true
 	mp[2][3] = true */
-	render(mp)
-	muerte(mp, area{a: point{x: 0, y: 0}, b: point{x: n - 1, y: m - 1}})
-	render(mp)
-	muerte(mp, area{a: point{x: 0, y: 0}, b: point{x: n - 1, y: m - 1}})
-	render(mp)
-	muerte(mp, area{a: point{x: 0, y: 0}, b: point{x: n - 1, y: m - 1}})
-	render(mp)
-	muerte(mp, area{a: point{x: 0, y: 0}, b: point{x: n - 1, y: m - 1}})
-	render(mp)
 
 }
 
@@ -48,7 +69,7 @@ func render(mp [][]bool) {
 		}
 		print("\n")
 	}
-	fmt.Println("")
+	print("\n")
 }
 
 //e.a.x 00    e.b.x 9      e.b.y 15
@@ -100,7 +121,11 @@ func moore(mp [][]bool, i, j int) bool {
 	}
 	// con CON cantidad que sucede...
 
-	if mp[i][j] {
+	return reglas(mp[i][j], con)
+}
+
+func reglas(mp bool, con int) bool {
+	if mp {
 		switch {
 		case con < 3:
 			return false
