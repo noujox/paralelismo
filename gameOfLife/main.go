@@ -20,11 +20,11 @@ func main() {
 		mp[i] = make([]bool, n)
 	}
 
-	mp[1][2] = true
+	/* mp[1][2] = true
 	mp[3][2] = true
 	mp[2][1] = true
 	mp[2][2] = true
-	mp[2][3] = true
+	mp[2][3] = true */
 	render(mp)
 	muerte(mp, area{a: point{x: 0, y: 0}, b: point{x: n - 1, y: m - 1}})
 	render(mp)
