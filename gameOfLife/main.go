@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 )
@@ -26,6 +27,7 @@ func main() {
 	bloqueBool := false
 	semilla := 1
 
+	//se obtienen los datos de parametros
 	for i, arg := range args {
 		switch arg {
 		case "-ng":
@@ -50,12 +52,15 @@ func main() {
 		mp[i] = make([]bool, n)
 	}
 
-	/* mp[1][2] = true
-	mp[3][2] = true
-	mp[2][1] = true
-	mp[2][2] = true
-	mp[2][3] = true */
+	populate(mp, semilla, area{a: point{x: 0, y: 0}, b: point{x: n - 1, y: m - 1}})
 
+}
+func populate(mp [][]bool, sem int, e area) {
+	for i := 0; i < sem; i++ {
+		x := (rand.Intn(e.b.x-e.a.x) + e.a.x)
+		y := (rand.Intn(e.b.y-e.a.y) + e.a.y)
+		mp[x][y] = true
+	}
 }
 
 func render(mp [][]bool) {
