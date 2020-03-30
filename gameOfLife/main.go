@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"time"
 )
 
 type point struct {
@@ -21,8 +22,8 @@ func main() {
 	args := os.Args
 
 	ite := 1
-	n := 1
-	m := 1
+	n := 1 //x
+	m := 1 //y
 	nGo := 1
 	bloqueBool := false
 	semilla := 1
@@ -47,19 +48,52 @@ func main() {
 		}
 	}
 
+	//creado de mapa
 	mp := make([][]bool, m)
 	for i := 0; i < len(mp); i++ {
 		mp[i] = make([]bool, n)
 	}
+	//fmt.Println(semilla)
+	populate(mp, semilla, area{a: point{x: 0, y: 0}, b: point{x: n, y: m}})
 
-	populate(mp, semilla, area{a: point{x: 0, y: 0}, b: point{x: n - 1, y: m - 1}})
-
+	e := calculateArea(bloqueBool, nGo, n, m)
+	for i := 0; i < ite; i++ {
+		render(mp)
+		muerte(mp, e[0])
+	}
+	render(mp)
 }
+
+func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
+	var e []area
+	if bloqueBool {
+		// cuadrado
+	} else { //columna
+
+		blocks := m / chunks
+		rest := m % chunks
+		for i := 0; i < chunks; i++ {
+			if i < rest {
+				e = append(e, area{
+					a: point{x: (i * (blocks + 1)), y: 0},
+					b: point{x: ((i + 1) * (blocks + 1)), y: m - 1}})
+			} else {
+				e = append(e, area{
+					a: point{x: (i * (blocks)), y: 0},
+					b: point{x: ((i + 1) * (blocks)), y: m - 1}})
+			}
+		}
+	}
+	return e
+}
+
 func populate(mp [][]bool, sem int, e area) {
+	s := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(s)
 	for i := 0; i < sem; i++ {
-		x := (rand.Intn(e.b.x-e.a.x) + e.a.x)
-		y := (rand.Intn(e.b.y-e.a.y) + e.a.y)
-		mp[x][y] = true
+		x := (r.Intn(e.b.x-e.a.x) + e.a.x)
+		y := (r.Intn(e.b.y-e.a.y) + e.a.y)
+		mp[x][y] = true // falta comprobar si ya habia algo
 	}
 }
 
@@ -69,7 +103,7 @@ func render(mp [][]bool) {
 			if j {
 				print("■ ")
 			} else {
-				print("▫ ")
+				print("□ ")
 			}
 		}
 		print("\n")
@@ -96,8 +130,8 @@ func muerte(mp [][]bool, e area) {
 
 //comprabamos cada lado de una celula
 func moore(mp [][]bool, i, j int) bool {
-	n := len(mp[0])
-	m := len(mp)
+	n := len(mp[0]) - 1
+	m := len(mp) - 1
 
 	var con int
 	if i != 0 && mp[i-1][j] { // 				↓
