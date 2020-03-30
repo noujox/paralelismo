@@ -56,13 +56,18 @@ func main() {
 	populate(mp, semilla, area{a: point{x: 0, y: 0}, b: point{x: n, y: m}})
 
 	e := calculateArea(bloqueBool, nGo, n, m)
-	println("area: (", e[0].a.x, ",", e[0].a.y, ") (", e[0].b.x, ",", e[0].b.y, ")")
-
-	for i := 0; i < ite; i++ {
-		render(mp)
-		muerte(mp, e[0])
+	for i := 0; i < len(e); i++ {
+		println("area: (", e[i].a.x, ",", e[i].a.y, ") (", e[i].b.x, ",", e[i].b.y, ")")
 	}
-	render(mp)
+
+	_ = ite
+	/*
+		for i := 0; i < ite; i++ {
+			render(mp)
+			muerte(mp, e[0])
+		}
+		render(mp)
+	*/
 }
 
 func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
@@ -73,15 +78,26 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 
 		blocks := n / chunks
 		rest := n % chunks
-		for i := 0; i < chunks; i++ {
-			if i < rest {
+		if rest == 0 {
+			fmt.Println("hola", blocks)
+			for i := 0; i < chunks; i++ {
 				e = append(e, area{
-					a: point{x: (i * (blocks + 1)), y: 0},
-					b: point{x: ((i+1)*blocks + i), y: m}})
-			} else {
-				e = append(e, area{
-					a: point{x: ((i + 1) * blocks), y: 0},
-					b: point{x: ((i+1)*blocks + 1), y: m}})
+					a: point{x: (i * blocks), y: 0},
+					b: point{x: ((i+1)*blocks - 1), y: m}})
+
+			}
+		} else {
+
+			for i := 0; i < chunks; i++ {
+				if i < rest {
+					e = append(e, area{
+						a: point{x: (i * (blocks + 1)), y: 0},
+						b: point{x: ((i+1)*blocks + i), y: m}})
+				} else {
+					e = append(e, area{
+						a: point{x: ((i + 1) * blocks), y: 0},
+						b: point{x: ((i+1)*blocks + 1), y: m}})
+				}
 			}
 		}
 	}
