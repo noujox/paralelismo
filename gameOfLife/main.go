@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
-	"time"
 )
 
 type point struct {
@@ -33,9 +32,9 @@ func main() {
 		switch arg {
 		case "-ng":
 			nGo, _ = strconv.Atoi(args[i+1])
-		case "-r":
-			n, _ = strconv.Atoi(args[i+1])
 		case "-c":
+			n, _ = strconv.Atoi(args[i+1])
+		case "-r":
 			m, _ = strconv.Atoi(args[i+1])
 		case "-i":
 			ite, _ = strconv.Atoi(args[i+1])
@@ -57,6 +56,8 @@ func main() {
 	populate(mp, semilla, area{a: point{x: 0, y: 0}, b: point{x: n, y: m}})
 
 	e := calculateArea(bloqueBool, nGo, n, m)
+	println("area: (", e[0].a.x, ",", e[0].a.y, ") (", e[0].b.x, ",", e[0].b.y, ")")
+
 	for i := 0; i < ite; i++ {
 		render(mp)
 		muerte(mp, e[0])
@@ -70,17 +71,17 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 		// cuadrado
 	} else { //columna
 
-		blocks := m / chunks
-		rest := m % chunks
+		blocks := n / chunks
+		rest := n % chunks
 		for i := 0; i < chunks; i++ {
 			if i < rest {
 				e = append(e, area{
 					a: point{x: (i * (blocks + 1)), y: 0},
-					b: point{x: ((i + 1) * (blocks + 1)), y: m - 1}})
+					b: point{x: ((i+1)*blocks + i), y: m - 1}})
 			} else {
 				e = append(e, area{
-					a: point{x: (i * (blocks)), y: 0},
-					b: point{x: ((i + 1) * (blocks)), y: m - 1}})
+					a: point{x: ((i + 1) * blocks), y: 0},
+					b: point{x: ((i+1)*blocks + 1), y: m - 1}})
 			}
 		}
 	}
@@ -88,27 +89,32 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 }
 
 func populate(mp [][]bool, sem int, e area) {
-	s := rand.NewSource(time.Now().UnixNano())
+	s := rand.NewSource(42)
 	r := rand.New(s)
 	for i := 0; i < sem; i++ {
 		x := (r.Intn(e.b.x-e.a.x) + e.a.x)
 		y := (r.Intn(e.b.y-e.a.y) + e.a.y)
-		mp[x][y] = true // falta comprobar si ya habia algo
+		mp[y][x] = true // falta comprobar si ya habia algo
 	}
 }
 
 func render(mp [][]bool) {
 	for i := range mp {
-		for _, j := range mp[i] {
-			if j {
-				print("■ ")
+		for j, v := range mp[i] {
+			if i == 4 && j == 3 {
+				print("x ")
 			} else {
-				print("□ ")
+				if v {
+					print("■ ")
+				} else {
+					print("□ ")
+				}
 			}
 		}
 		print("\n")
 	}
 	print("\n")
+
 }
 
 //e.a.x 00    e.b.x 9      e.b.y 15
@@ -133,7 +139,7 @@ func moore(mp [][]bool, i, j int) bool {
 	n := len(mp[0]) - 1
 	m := len(mp) - 1
 
-	var con int
+	con := 0
 	if i != 0 && mp[i-1][j] { // 				↓
 		con++
 	}
@@ -159,6 +165,9 @@ func moore(mp [][]bool, i, j int) bool {
 		con++
 	}
 	// con CON cantidad que sucede...
+	if i == 4 && j == 3 {
+		fmt.Println(con)
+	}
 
 	return reglas(mp[i][j], con)
 }
