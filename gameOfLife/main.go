@@ -77,11 +77,11 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 			if i < rest {
 				e = append(e, area{
 					a: point{x: (i * (blocks + 1)), y: 0},
-					b: point{x: ((i+1)*blocks + i), y: m - 1}})
+					b: point{x: ((i+1)*blocks + i), y: m}})
 			} else {
 				e = append(e, area{
 					a: point{x: ((i + 1) * blocks), y: 0},
-					b: point{x: ((i+1)*blocks + 1), y: m - 1}})
+					b: point{x: ((i+1)*blocks + 1), y: m}})
 			}
 		}
 	}
