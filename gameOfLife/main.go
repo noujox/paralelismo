@@ -111,21 +111,21 @@ func populate(mp [][]bool, sem int, e area) {
 	for i := 0; i < sem; i++ {
 		x := (r.Intn(e.b.x-e.a.x) + e.a.x)
 		y := (r.Intn(e.b.y-e.a.y) + e.a.y)
-		mp[y][x] = true // falta comprobar si ya habia algo
+		if mp[y][x] {
+			i--
+		} else {
+			mp[y][x] = true
+		}
 	}
 }
 
 func render(mp [][]bool) {
 	for i := range mp {
-		for j, v := range mp[i] {
-			if i == 4 && j == 3 {
-				print("x ")
+		for _, v := range mp[i] {
+			if v {
+				print("■ ")
 			} else {
-				if v {
-					print("■ ")
-				} else {
-					print("□ ")
-				}
+				print("□ ")
 			}
 		}
 		print("\n")
