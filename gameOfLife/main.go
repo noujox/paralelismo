@@ -57,14 +57,17 @@ func main() {
 	populate(mp, semilla, area{a: point{x: 0, y: 0}, b: point{x: n, y: m}})
 
 	e := calculateArea(bloqueBool, nGo, n, m)
-	var wg sync.WaitGroup
-	wg.Add(nGo)
+	var wg, jo sync.WaitGroup
 
 	for i := 0; i < ite; i++ {
+		wg.Add(nGo)
+		jo.Add(nGo)
 		render(mp)
+
 		for j := 0; j < nGo; j++ {
-			go muerte(mp, e[j], &wg)
+			go muerte(mp, e[j], &wg, &jo)
 		}
+		jo.Wait()
 	}
 	render(mp)
 
@@ -79,13 +82,10 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 		blocks := n / chunks
 		rest := n % chunks
 		if rest == 0 {
-			fmt.Println("hola", blocks)
 			for i := 0; i < chunks; i++ {
 				e = append(e, area{
 					a: point{x: (i * blocks), y: 0},
 					b: point{x: ((i+1)*blocks - 1), y: m - 1}})
-				println("area0: (", e[i].a.x, ",", e[i].a.y, ") (", e[i].b.x, ",", e[i].b.y, ")")
-
 			}
 		} else {
 
@@ -99,7 +99,6 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 						a: point{x: (i*blocks + rest), y: 0},
 						b: point{x: ((i+1)*blocks + rest - 1), y: m - 1}})
 				}
-				println("area: (", e[i].a.x, ",", e[i].a.y, ") (", e[i].b.x, ",", e[i].b.y, ")")
 			}
 		}
 	}
@@ -132,12 +131,11 @@ func render(mp [][]bool) {
 		print("\n")
 	}
 	print("\n")
-
 }
 
 //e.a.x 00    e.b.x 9      e.b.y 15
 //se revisa un area del mapa buscando celulas
-func muerte(mp [][]bool, e area, wg *sync.WaitGroup) {
+func muerte(mp [][]bool, e area, wg, jo *sync.WaitGroup) {
 	//copia de la matris
 	cmp := make([][]bool, len(mp))
 	for i := range mp {
@@ -154,6 +152,7 @@ func muerte(mp [][]bool, e area, wg *sync.WaitGroup) {
 
 		}
 	}
+	jo.Done()
 }
 
 //comprabamos cada lado de una celula
