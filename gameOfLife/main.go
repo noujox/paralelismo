@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"sync"
 )
 
 type point struct {
@@ -56,18 +57,17 @@ func main() {
 	populate(mp, semilla, area{a: point{x: 0, y: 0}, b: point{x: n, y: m}})
 
 	e := calculateArea(bloqueBool, nGo, n, m)
-	for i := 0; i < len(e); i++ {
-		println("area: (", e[i].a.x, ",", e[i].a.y, ") (", e[i].b.x, ",", e[i].b.y, ")")
-	}
+	var wg sync.WaitGroup
+	wg.Add(nGo)
 
-	_ = ite
-	/*
-		for i := 0; i < ite; i++ {
-			render(mp)
-			muerte(mp, e[0])
-		}
+	for i := 0; i < ite; i++ {
 		render(mp)
-	*/
+		for j := 0; j < nGo; j++ {
+			go muerte(mp, e[j], &wg)
+		}
+	}
+	render(mp)
+
 }
 
 func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
@@ -83,7 +83,8 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 			for i := 0; i < chunks; i++ {
 				e = append(e, area{
 					a: point{x: (i * blocks), y: 0},
-					b: point{x: ((i+1)*blocks - 1), y: m}})
+					b: point{x: ((i+1)*blocks - 1), y: m - 1}})
+				println("area0: (", e[i].a.x, ",", e[i].a.y, ") (", e[i].b.x, ",", e[i].b.y, ")")
 
 			}
 		} else {
@@ -92,12 +93,13 @@ func calculateArea(bloqueBool bool, chunks int, n, m int) []area {
 				if i < rest {
 					e = append(e, area{
 						a: point{x: (i * (blocks + 1)), y: 0},
-						b: point{x: ((i+1)*blocks + i), y: m}})
+						b: point{x: ((i+1)*blocks + i), y: m - 1}})
 				} else {
 					e = append(e, area{
-						a: point{x: ((i + 1) * blocks), y: 0},
-						b: point{x: ((i+1)*blocks + 1), y: m}})
+						a: point{x: (i*blocks + rest), y: 0},
+						b: point{x: ((i+1)*blocks + rest - 1), y: m - 1}})
 				}
+				println("area: (", e[i].a.x, ",", e[i].a.y, ") (", e[i].b.x, ",", e[i].b.y, ")")
 			}
 		}
 	}
@@ -135,7 +137,7 @@ func render(mp [][]bool) {
 
 //e.a.x 00    e.b.x 9      e.b.y 15
 //se revisa un area del mapa buscando celulas
-func muerte(mp [][]bool, e area) {
+func muerte(mp [][]bool, e area, wg *sync.WaitGroup) {
 	//copia de la matris
 	cmp := make([][]bool, len(mp))
 	for i := range mp {
@@ -143,9 +145,13 @@ func muerte(mp [][]bool, e area) {
 		copy(cmp[i], mp[i])
 	}
 
-	for i := e.a.y; i < e.b.y; i++ {
-		for j := e.a.x; j < e.b.x; j++ {
+	wg.Done()
+	wg.Wait()
+
+	for i := e.a.y; i <= e.b.y; i++ {
+		for j := e.a.x; j <= e.b.x; j++ {
 			mp[i][j] = moore(cmp, i, j)
+
 		}
 	}
 }
@@ -181,9 +187,6 @@ func moore(mp [][]bool, i, j int) bool {
 		con++
 	}
 	// con CON cantidad que sucede...
-	if i == 4 && j == 3 {
-		fmt.Println(con)
-	}
 
 	return reglas(mp[i][j], con)
 }
