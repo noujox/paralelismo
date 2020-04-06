@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type point struct {
@@ -16,6 +18,8 @@ type area struct {
 	a point
 	b point
 }
+
+var resultados []time.Duration
 
 func main() {
 	//  -ng NUM_GORUTINAS -r NUM_FILAS -c NUM_COLS -i GENERACIONES \path -m MET_PART -s SEMILLA
@@ -47,6 +51,7 @@ func main() {
 			semilla, _ = strconv.Atoi(args[i+1])
 		}
 	}
+	var tiempototal = time.Now()
 
 	//creado de mapa
 	mp := make([][]bool, m)
@@ -70,6 +75,18 @@ func main() {
 		jo.Wait()
 	}
 	render(mp)
+	var sum time.Duration
+	for _, val := range resultados {
+		sum += val
+	}
+	x := sum / time.Duration(nGo)
+
+	file, _ := os.Create("resultados.txt")
+	w := bufio.NewWriter(file)
+	fmt.Println(fmt.Fprintln(w, "Tiempo barrera promedio: ", x))
+
+	fmt.Fprintln(w, "Tiempo total: ", time.Since(tiempototal))
+	file.Close()
 
 }
 
@@ -143,8 +160,10 @@ func muerte(mp [][]bool, e area, wg, jo *sync.WaitGroup) {
 		copy(cmp[i], mp[i])
 	}
 
+	var tbarrera = time.Now()
 	wg.Done()
 	wg.Wait()
+	resultados = append(resultados, time.Since(tbarrera))
 
 	for i := e.a.y; i <= e.b.y; i++ {
 		for j := e.a.x; j <= e.b.x; j++ {
